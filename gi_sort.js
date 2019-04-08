@@ -58,6 +58,7 @@ var sortDirection = 1;
 window.addEventListener("load", function () {
       defineDataArray();
       writeTableData();
+      defineColumns();
 });
 
 function defineDataArray() {
@@ -66,28 +67,30 @@ function defineDataArray() {
             var rowCells = tableRows[i].children;
             var rowValues = new Array(rowCells.length);
             for (var j = 0; j < rowCells.length; j++) {
-                  rowValues += rowCells[j].textContent;
+                  rowValues[j] += rowCells[j].textContent;
             }
-            tableData += rowValues;
+            tableData[i] = rowValues;
       }
-      tableData.sort([writeTableData]);
-      console.log(tableData);
+      tableData.sort(dataSort2D);
 }
 
 function writeTableData() {
-      var tbody = document.createElement("tbody");
-      for (var i = 0; i < tableRows.length; i++) {
-            for (var j = 0; j < array.length; j++) {}
-
+      var newTableBody = document.createElement("tbody");
+      for (var i = 0; i < tableData.length; i++) {
+            var tableRow = document.createElement("tr");
+            for (var j = 0; j < tableData[i].length; j++) {
+                  var tableCell = document.createElement("td");
+                  tableCell.textContent = tableData[i][j];
+                  tableRow.appendChild(tableCell);
+            }
+            newTableBody.appendChild(tableRow);
       }
+      var sortTable = document.querySelector("table.sortable");
+      var oldTableBody = sortTable.lastElementChild;
+      sortTable.replaceChild(newTableBody, oldTableBody);
 }
 
-
-
-
-
-
-
+function defineColumns() {}
 
 function dataSort2D(a, b) {
       if (isNaN(parseFloat(a[sortIndex])) === false) {
