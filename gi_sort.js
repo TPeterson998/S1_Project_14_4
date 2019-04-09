@@ -51,30 +51,39 @@
     
 
 */
+// This is the gloabl arrays and variables used many times
 var tableData = [];
 var dataCategories = [];
 var sortIndex = 0;
 var sortDirection = 1;
+//this loads my functions on load
 window.addEventListener("load", function () {
       defineDataArray();
       writeTableData();
       defineColumns();
 });
 
+
+
 function defineDataArray() {
+      //creates a like array with the table rows
       var tableRows = document.querySelectorAll("table.sortable tbody tr");
       for (var i = 0; i < tableRows.length; i++) {
+            //this gets the text content of the table cells and puts them in to a new array that is created and then switches it into a global variable
             var rowCells = tableRows[i].children;
             var rowValues = new Array(rowCells.length);
             for (var j = 0; j < rowCells.length; j++) {
-                  rowValues[j] += rowCells[j].textContent;
+                  rowValues[j] = rowCells[j].textContent;
             }
             tableData[i] = rowValues;
       }
+      //this sorts the gloal array with the textcontent of the cells
       tableData.sort(dataSort2D);
 }
 
+
 function writeTableData() {
+      //this creates all a new table body with the sorted text content of the global var
       var newTableBody = document.createElement("tbody");
       for (var i = 0; i < tableData.length; i++) {
             var tableRow = document.createElement("tr");
@@ -85,12 +94,79 @@ function writeTableData() {
             }
             newTableBody.appendChild(tableRow);
       }
+      //this replaces the old table
       var sortTable = document.querySelector("table.sortable");
       var oldTableBody = sortTable.lastElementChild;
       sortTable.replaceChild(newTableBody, oldTableBody);
 }
 
-function defineColumns() {}
+
+function defineColumns() {
+      //this creates a new style element in the head and gives it these rules
+      var style = document.createElement("style");
+      document.head.appendChild(style);
+      style.sheet.insertRule(
+            //these rules change the pointer
+            "table.sortable thead tr th {\
+                  cursor: pointer;\
+            }", 0);
+      style.sheet.insertRule(
+            //These rules change the margin content and font family
+            "table.sortable thead tr th::after {\
+                  content: '\\00a0';\
+                  font-family: monospace;\
+                  margin-left: 5px;\
+            }", 1);
+      style.sheet.insertRule(
+            //These rule just change the content
+            "table.sortable thead tr th:nth-of-type(1)::after {\
+                  content: '\\25b2';\
+            }", 2);
+      //this gets all of the table header cells 
+      var tableHeadCell = document.querySelectorAll("th");
+      for (var i = 0; i < tableHeadCell.length; i++) {
+            //puts the table header cells in to one of the global arrays
+            dataCategories += tableHeadCell;
+            //this makes it so you can click any of the head cells call column sort
+            tableHeadCell[i].onclick = columnSort;
+      }
+}
+
+function columnSort(e) {
+      //this gets the text content of the clicked item
+      var columnText = e.textContent;
+      //this gets the index of the clicked item according to the text content of the clicked item
+      var columnIndex = dataCategories.indexOf(columnText);
+      //This changes it from accending or decending
+      if (columnIndex == sortIndex) {
+            sortDirection = sortDirection * -1;
+      } else {
+            sortIndex = columnIndex;
+      }
+      //this changes it back to accending
+      var columnNumber = columnIndex + 1;
+      //this gets the last stylesheet
+      var columnStyles = document.styleSheets[document.styleSheets.length - 1];
+      //this deletes the third rule
+      columnStyles.deleteRule(2);
+      //this changes the arrow according to accending or decending
+      if (sortDirection == 1) {
+            columnStyles.insertRule(
+                  "table.sortable thead tr th:nth-of-type(" + columnNumber + ")::after {\
+                   content: '\\25b2';\
+      }", 0)
+      } else {
+            columnStyles.insertRule(
+                  "table.sortable thead tr th:nth-of-type(" + columnNumber + ")::after {\
+      content: '\\25bc';\
+      }", 1);
+      }
+      //this sorts the new table that is made
+      tableData.sort(dataSort2D);
+      writeTableData();
+}
+
+
 
 function dataSort2D(a, b) {
       if (isNaN(parseFloat(a[sortIndex])) === false) {
